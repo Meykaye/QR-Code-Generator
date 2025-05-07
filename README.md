@@ -40,7 +40,7 @@ Pillow
 ## 🛠️ How to Run
 
 ```bash
-python dark_qrcode_generator.py
+python qr_main.py
 ```
 
 > Ensure the script filename matches the one you're using.
@@ -59,7 +59,7 @@ python dark_qrcode_generator.py
 ## 📁 Project Structure
 
 ```
-📁 DarkQRCodeGenerator/
+📁 QR-Code-Generator/
 ├── qr_main.py
 ├── requirements.txt
 └── README.md
