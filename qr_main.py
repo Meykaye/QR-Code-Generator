@@ -6,195 +6,407 @@ from PyQt5.QtGui import QPixmap, QIcon, QFont, QPalette, QColor
 from PyQt5.QtCore import Qt, QSize
 import qrcode
 from urllib.parse import urlparse
+import os
 
-class DarkMaterialButton(QPushButton):
-    def __init__(self, text, parent=None):
+class ModernButton(QPushButton):
+    def __init__(self, text, parent=None, style="primary"):
         super().__init__(text, parent)
-        self.setFont(QFont("Roboto", 10, QFont.Medium))
+        self.style_type = style
+        self.setFont(QFont("Arial", 11, QFont.Bold))
         self.setCursor(Qt.PointingHandCursor)
+        self.setFixedHeight(45)
+        
+        if style == "primary":
+            self.setStyleSheet("""
+                QPushButton {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+                                               stop:0 #4f46e5, stop:1 #7c3aed);
+                    color: white;
+                    border-radius: 8px;
+                    padding: 0px 20px;
+                    font-weight: bold;
+                    border: none;
+                }
+                QPushButton:hover {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+                                               stop:0 #5b21b6, stop:1 #8b5cf6);
+                }
+                QPushButton:pressed {
+                    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+                                               stop:0 #3730a3, stop:1 #6d28d9);
+                }
+                QPushButton:disabled {
+                    background: #374151;
+                    color: #9ca3af;
+                }
+            """)
+        else:  # secondary style
+            self.setStyleSheet("""
+                QPushButton {
+                    background: #374151;
+                    color: #e5e7eb;
+                    border: 1px solid #4b5563;
+                    border-radius: 8px;
+                    padding: 0px 20px;
+                    font-weight: normal;
+                }
+                QPushButton:hover {
+                    background: #4b5563;
+                    border: 1px solid #6b7280;
+                    color: white;
+                }
+                QPushButton:pressed {
+                    background: #1f2937;
+                    border: 1px solid #374151;
+                }
+            """)
+
+class DarkLineEdit(QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFont(QFont("Arial", 12))
+        self.setFixedHeight(50)
         self.setStyleSheet("""
-            QPushButton {
-                background-color: #BB86FC;
-                color: #121212;
-                border-radius: 4px;
-                padding: 8px 16px;
-                min-width: 64px;
-                border: none;
+            QLineEdit {
+                background: #1f2937;
+                border: 2px solid #374151;
+                border-radius: 8px;
+                padding: 12px 16px;
+                color: #f9fafb;
+                font-size: 14px;
+                selection-background-color: #4f46e5;
+                selection-color: white;
             }
-            QPushButton:hover {
-                background-color: #CF9FFF;
+            QLineEdit:focus {
+                border: 2px solid #4f46e5;
+                background: #111827;
             }
-            QPushButton:pressed {
-                background-color: #9A67EA;
-            }
-            QPushButton:disabled {
-                background-color: #424242;
-                color: #757575;
+            QLineEdit::placeholder {
+                color: #9ca3af;
             }
         """)
 
-class DarkMaterialLineEdit(QLineEdit):
+class DarkFrame(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFont(QFont("Roboto", 10))
         self.setStyleSheet("""
-            QLineEdit {
-                border: 1px solid #424242;
-                border-radius: 4px;
-                padding: 8px;
-                background-color: #424242;
-                color: #E0E0E0;
-                selection-background-color: #BB86FC;
-                selection-color: #121212;
+            QFrame {
+                background: #111827;
+                border: 1px solid #374151;
+                border-radius: 12px;
+                padding: 30px;
             }
-            QLineEdit:focus {
-                border: 2px solid #BB86FC;
-                padding: 7px;
+        """)
+
+class QRDisplayFrame(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet("""
+            QFrame {
+                background: #111827;
+                border: 1px solid #374151;
+                border-radius: 12px;
+                padding: 30px;
             }
         """)
 
 class DarkQRCodeGeneratorApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("QR Code Generator")
-        self.setWindowIcon(QIcon(":qrcode-icon"))
-        self.setMinimumSize(400, 500)
+        self.setWindowTitle("QR Code Generator - Dark Theme")
         
-        # Set dark material design palette
-        palette = QPalette()
-        palette.setColor(QPalette.Window, QColor("#121212"))
-        palette.setColor(QPalette.WindowText, QColor("#E0E0E0"))
-        palette.setColor(QPalette.Base, QColor("#1E1E1E"))
-        palette.setColor(QPalette.AlternateBase, QColor("#121212"))
-        palette.setColor(QPalette.ToolTipBase, QColor("#1E1E1E"))
-        palette.setColor(QPalette.ToolTipText, QColor("#E0E0E0"))
-        palette.setColor(QPalette.Text, QColor("#E0E0E0"))
-        palette.setColor(QPalette.Button, QColor("#BB86FC"))
-        palette.setColor(QPalette.ButtonText, QColor("#121212"))
-        palette.setColor(QPalette.BrightText, Qt.white)
-        palette.setColor(QPalette.Highlight, QColor("#BB86FC"))
-        palette.setColor(QPalette.HighlightedText, QColor("#121212"))
-        palette.setColor(QPalette.Disabled, QPalette.Button, QColor("#424242"))
-        palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor("#757575"))
-        self.setPalette(palette)
+        # Increased window height and fixed size
+        self.setFixedSize(1000, 700)
         
+        # Set dark theme
+        self.setStyleSheet("""
+            QMainWindow {
+                background: #0f172a;
+                color: #f8fafc;
+            }
+        """)
+        
+        self.qr_pixmap = None
         self.init_ui()
         
     def init_ui(self):
+        # Main widget with horizontal layout
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         
-        layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(20)
+        # Main horizontal layout for two sections
+        main_layout = QHBoxLayout()
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
         
-        # Header
-        header = QLabel("QR Code Generator")
-        header.setFont(QFont("Roboto", 18, QFont.Bold))
-        header.setStyleSheet("color: #BB86FC;")
-        header.setAlignment(Qt.AlignCenter)
-        layout.addWidget(header)
+        # LEFT SECTION - Input Section
+        left_section = self.create_input_section()
+        main_layout.addWidget(left_section)
         
-        # Input section
-        input_frame = QFrame()
-        input_frame.setStyleSheet("""
-            background-color: #1E1E1E;
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid #424242;
+        # RIGHT SECTION - QR Display Section  
+        right_section = self.create_qr_section()
+        main_layout.addWidget(right_section)
+        
+        # Set equal widths for both sections
+        main_layout.setStretchFactor(left_section, 1)
+        main_layout.setStretchFactor(right_section, 1)
+        
+        main_widget.setLayout(main_layout)
+    
+    def create_input_section(self):
+        """Create the left input section"""
+        # Create main container widget without frame styling
+        input_container = QWidget()
+        input_container.setStyleSheet("""
+            QWidget {
+                background: #111827;
+                border: 1px solid #374151;
+                border-radius: 12px;
+            }
         """)
-        input_layout = QVBoxLayout(input_frame)
-        input_layout.setSpacing(16)
         
-        input_label = QLabel("Enter URL:")
-        input_label.setFont(QFont("Roboto", 10, QFont.Medium))
-        input_label.setStyleSheet("color: #E0E0E0;")
+        input_layout = QVBoxLayout(input_container)
+        input_layout.setContentsMargins(30, 30, 30, 30)
+        input_layout.setSpacing(20)
+        
+        # Section title
+        title = QLabel("Generate QR Code")
+        title.setFont(QFont("Arial", 24, QFont.Bold))
+        title.setStyleSheet("""
+            QLabel {
+                color: #f8fafc;
+                background: transparent;
+                border: none;
+            }
+        """)
+        title.setAlignment(Qt.AlignCenter)
+        input_layout.addWidget(title)
+        
+        # Subtitle
+        subtitle = QLabel("Enter URL or text to generate QR code")
+        subtitle.setFont(QFont("Arial", 14))
+        subtitle.setStyleSheet("""
+            QLabel {
+                color: #94a3b8;
+                background: transparent;
+                border: none;
+            }
+        """)
+        subtitle.setAlignment(Qt.AlignCenter)
+        input_layout.addWidget(subtitle)
+        
+        # Add flexible spacing
+        input_layout.addStretch(1)
+        
+        # Input label
+        input_label = QLabel("Enter URL or Text:")
+        input_label.setFont(QFont("Arial", 14, QFont.Bold))
+        input_label.setStyleSheet("""
+            QLabel {
+                color: #f8fafc;
+                background: transparent;
+                border: none;
+            }
+        """)
         input_layout.addWidget(input_label)
         
-        self.url_input = DarkMaterialLineEdit()
-        self.url_input.setPlaceholderText("https://example.com")
+        # Input field
+        self.url_input = DarkLineEdit()
+        self.url_input.setPlaceholderText("https://example.com or any text...")
+        self.url_input.returnPressed.connect(self.generate_qr_code)
         input_layout.addWidget(self.url_input)
         
-        generate_btn = DarkMaterialButton("Generate QR Code")
+        # Add spacing before buttons
+        input_layout.addSpacing(15)
+        
+        # Generate button
+        generate_btn = ModernButton("Generate QR Code", style="primary")
         generate_btn.clicked.connect(self.generate_qr_code)
         input_layout.addWidget(generate_btn)
         
-        layout.addWidget(input_frame)
+        # Add spacing between buttons
+        input_layout.addSpacing(10)
         
-        # QR Code display section
-        self.qr_frame = QFrame()
-        self.qr_frame.setStyleSheet("""
-            background-color: #1E1E1E;
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid #424242;
-        """)
-        self.qr_frame.setVisible(False)
+        # Clear button
+        clear_btn = ModernButton("Clear", style="secondary")
+        clear_btn.clicked.connect(self.clear_input)
+        input_layout.addWidget(clear_btn)
+        
+        # Add flexible spacing at bottom
+        input_layout.addStretch(1)
+        
+        return input_container
+    
+    def create_qr_section(self):
+        """Create the right QR display section"""
+        self.qr_frame = QRDisplayFrame()
         qr_layout = QVBoxLayout(self.qr_frame)
-        qr_layout.setSpacing(16)
+        qr_layout.setSpacing(20)
         
-        qr_label = QLabel("Your QR Code:")
-        qr_label.setFont(QFont("Roboto", 10, QFont.Medium))
-        qr_label.setStyleSheet("color: #E0E0E0;")
-        qr_layout.addWidget(qr_label)
+        # QR Section title
+        qr_title = QLabel("QR Code Preview")
+        qr_title.setFont(QFont("Arial", 20, QFont.Bold))
+        qr_title.setStyleSheet("""
+            QLabel {
+                color: #f8fafc;
+                margin-bottom: 10px;
+            }
+        """)
+        qr_title.setAlignment(Qt.AlignCenter)
+        qr_layout.addWidget(qr_title)
         
+        # QR Code display area
         self.qr_image_label = QLabel()
         self.qr_image_label.setAlignment(Qt.AlignCenter)
+        self.qr_image_label.setStyleSheet("""
+            QLabel {
+                background: #1f2937;
+                border: 2px dashed #4b5563;
+                border-radius: 12px;
+                padding: 30px;
+                min-height: 350px;
+                color: #9ca3af;
+                font-size: 16px;
+            }
+        """)
+        self.qr_image_label.setText("QR Code will appear here\n\nEnter text or URL and click\n'Generate QR Code'")
+        self.qr_image_label.setMinimumSize(350, 350)
         qr_layout.addWidget(self.qr_image_label)
         
-        save_btn = DarkMaterialButton("Save QR Code")
-        save_btn.clicked.connect(self.save_qr_code)
-        qr_layout.addWidget(save_btn)
+        # URL display
+        self.url_display = QLabel()
+        self.url_display.setFont(QFont("Arial", 11))
+        self.url_display.setStyleSheet("""
+            QLabel {
+                color: #94a3b8;
+                background: #1f2937;
+                border-radius: 6px;
+                padding: 10px 12px;
+                border: 1px solid #374151;
+            }
+        """)
+        self.url_display.setWordWrap(True)
+        self.url_display.setAlignment(Qt.AlignCenter)
+        self.url_display.hide()  # Initially hidden
+        qr_layout.addWidget(self.url_display)
         
-        layout.addWidget(self.qr_frame)
+        # Save button
+        self.save_btn = ModernButton("Save QR Code", style="primary")
+        self.save_btn.clicked.connect(self.save_qr_code)
+        self.save_btn.hide()  # Initially hidden
+        qr_layout.addWidget(self.save_btn)
         
-        # Add stretch to push everything up
-        layout.addStretch()
+        return self.qr_frame
+    
+    def clear_input(self):
+        self.url_input.clear()
+        self.qr_image_label.clear()
+        self.qr_image_label.setText("QR Code will appear here\n\nEnter text or URL and click\n'Generate QR Code'")
+        self.qr_image_label.setStyleSheet("""
+            QLabel {
+                background: #1f2937;
+                border: 2px dashed #4b5563;
+                border-radius: 12px;
+                padding: 30px;
+                min-height: 350px;
+                color: #9ca3af;
+                font-size: 16px;
+            }
+        """)
+        self.url_display.hide()
+        self.save_btn.hide()
+        self.qr_pixmap = None
         
-        main_widget.setLayout(layout)
+    def is_valid_input(self, text: str) -> bool:
+        if not text.strip():
+            return False
         
-    def is_link_valid(self, website_link: str) -> bool:
-        parsed = urlparse(website_link)
-        return all([parsed.scheme in ("http", "https"), parsed.netloc])
+        # Check if it's a URL
+        parsed = urlparse(text)
+        if parsed.scheme in ("http", "https") and parsed.netloc:
+            return True
+        
+        # If not a URL, accept any non-empty text
+        return len(text.strip()) > 0
     
     def generate_qr_code(self):
-        website_link = self.url_input.text().strip()
+        input_text = self.url_input.text().strip()
         
         try:
-            if not website_link:
-                raise ValueError("Please enter a URL")
-            if not self.is_link_valid(website_link):
-                raise ValueError("Invalid URL. Please enter a valid http or https URL")
+            if not input_text:
+                raise ValueError("Please enter a URL or text")
             
-            # Generate QR code
-            qr = qrcode.QRCode(version=5, box_size=5, border=5)
-            qr.add_data(website_link)
-            qr.make()
+            if not self.is_valid_input(input_text):
+                raise ValueError("Please enter valid text or a URL")
             
-            img = qr.make_image(fill_color='white', back_color='black')
+            # Generate QR code with high quality settings
+            qr = qrcode.QRCode(
+                version=1,  # Let it auto-determine size
+                error_correction=qrcode.constants.ERROR_CORRECT_H,  # High error correction
+                box_size=10,  # Good box size for quality
+                border=4,
+            )
+            qr.add_data(input_text)
+            qr.make(fit=True)
             
-            # Convert to pixmap and display
-            img.save('temp_qr.png')
-            pixmap = QPixmap('temp_qr.png')
-            self.qr_image_label.setPixmap(pixmap.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            self.qr_frame.setVisible(True)
+            # Create QR code image with high contrast
+            img = qr.make_image(fill_color='black', back_color='white')
             
+            # Save temporarily and load as pixmap
+            temp_path = 'temp_qr.png'
+            img.save(temp_path)
+            
+            # Load and scale the QR code to fit the display area
+            pixmap = QPixmap(temp_path)
+            scaled_pixmap = pixmap.scaled(300, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            
+            # Update the QR display
+            self.qr_image_label.setPixmap(scaled_pixmap)
+            self.qr_image_label.setStyleSheet("""
+                QLabel {
+                    background: white;
+                    border: 2px solid #4b5563;
+                    border-radius: 12px;
+                    padding: 20px;
+                    min-height: 350px;
+                }
+            """)
+            
+            self.qr_pixmap = pixmap  # Store original for saving
+            
+            # Display the input text
+            display_text = input_text
+            if len(display_text) > 60:
+                display_text = display_text[:60] + "..."
+            self.url_display.setText(f"Content: {display_text}")
+            self.url_display.show()
+            
+            # Show save button
+            self.save_btn.show()
+            
+            # Clean up temp file
+            try:
+                os.remove(temp_path)
+            except:
+                pass
+                
         except Exception as e:
             self.show_error_message(str(e))
     
     def save_qr_code(self):
-        if not self.qr_image_label.pixmap():
+        if not self.qr_pixmap:
             return
             
         file_path, _ = QFileDialog.getSaveFileName(
             self, 
             "Save QR Code", 
-            "", 
+            f"qrcode_{self.url_input.text()[:20].replace('/', '_').replace(':', '_')}.png",
             "PNG Files (*.png);;JPEG Files (*.jpg *.jpeg);;All Files (*)"
         )
         
         if file_path:
-            self.qr_image_label.pixmap().save(file_path)
+            # Save the original high-quality version
+            self.qr_pixmap.save(file_path)
             self.show_success_message("QR code saved successfully!")
     
     def show_error_message(self, message):
@@ -204,20 +416,26 @@ class DarkQRCodeGeneratorApp(QMainWindow):
         msg.setWindowTitle("Error")
         msg.setStyleSheet("""
             QMessageBox {
-                background-color: #1E1E1E;
+                background: #111827;
+                color: #f8fafc;
+                border-radius: 8px;
             }
-            QLabel {
-                color: #E0E0E0;
+            QMessageBox QLabel {
+                color: #f8fafc;
+                font-size: 14px;
+                padding: 10px;
             }
-            QPushButton {
-                background-color: #BB86FC;
-                color: #121212;
-                border-radius: 4px;
-                padding: 5px 10px;
-                min-width: 60px;
+            QMessageBox QPushButton {
+                background: #dc2626;
+                color: white;
+                border-radius: 6px;
+                padding: 8px 16px;
+                min-width: 80px;
+                font-weight: bold;
+                border: none;
             }
-            QPushButton:hover {
-                background-color: #CF9FFF;
+            QMessageBox QPushButton:hover {
+                background: #ef4444;
             }
         """)
         msg.exec_()
@@ -229,20 +447,26 @@ class DarkQRCodeGeneratorApp(QMainWindow):
         msg.setWindowTitle("Success")
         msg.setStyleSheet("""
             QMessageBox {
-                background-color: #1E1E1E;
+                background: #111827;
+                color: #f8fafc;
+                border-radius: 8px;
             }
-            QLabel {
-                color: #E0E0E0;
+            QMessageBox QLabel {
+                color: #f8fafc;
+                font-size: 14px;
+                padding: 10px;
             }
-            QPushButton {
-                background-color: #BB86FC;
-                color: #121212;
-                border-radius: 4px;
-                padding: 5px 10px;
-                min-width: 60px;
+            QMessageBox QPushButton {
+                background: #059669;
+                color: white;
+                border-radius: 6px;
+                padding: 8px 16px;
+                min-width: 80px;
+                font-weight: bold;
+                border: none;
             }
-            QPushButton:hover {
-                background-color: #CF9FFF;
+            QMessageBox QPushButton:hover {
+                background: #10b981;
             }
         """)
         msg.exec_()
@@ -250,10 +474,28 @@ class DarkQRCodeGeneratorApp(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     
-    # Set application style and font
+    # Set dark application style
     app.setStyle("Fusion")
-    app.setFont(QFont("Roboto", 10))
+    app.setFont(QFont("Arial", 10))
     
+    # Set dark palette for the entire application
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor("#0f172a"))
+    palette.setColor(QPalette.WindowText, QColor("#f8fafc"))
+    palette.setColor(QPalette.Base, QColor("#1f2937"))
+    palette.setColor(QPalette.AlternateBase, QColor("#111827"))
+    palette.setColor(QPalette.ToolTipBase, QColor("#1f2937"))
+    palette.setColor(QPalette.ToolTipText, QColor("#f8fafc"))
+    palette.setColor(QPalette.Text, QColor("#f8fafc"))
+    palette.setColor(QPalette.Button, QColor("#374151"))
+    palette.setColor(QPalette.ButtonText, QColor("#f8fafc"))
+    palette.setColor(QPalette.BrightText, QColor("#ffffff"))
+    palette.setColor(QPalette.Highlight, QColor("#4f46e5"))
+    palette.setColor(QPalette.HighlightedText, QColor("#ffffff"))
+    app.setPalette(palette)
+    
+    # Create and show the window
     window = DarkQRCodeGeneratorApp()
     window.show()
+    
     sys.exit(app.exec_())
