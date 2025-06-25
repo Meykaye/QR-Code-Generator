@@ -43,8 +43,6 @@ Pillow
 python qr_main.py
 ```
 
-> Ensure the script filename matches the one you're using.
-
 ---
 
 ## 🧠 How It Works
