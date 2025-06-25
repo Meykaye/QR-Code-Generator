@@ -183,7 +183,7 @@ class DarkQRCodeGeneratorApp(QMainWindow):
         input_layout.addWidget(title)
         
         # Subtitle
-        subtitle = QLabel("Enter URL or text to generate QR code")
+        subtitle = QLabel("Enter a valid URL to generate QR code")
         subtitle.setFont(QFont("Arial", 14))
         subtitle.setStyleSheet("""
             QLabel {
@@ -199,7 +199,7 @@ class DarkQRCodeGeneratorApp(QMainWindow):
         input_layout.addStretch(1)
         
         # Input label
-        input_label = QLabel("Enter URL or Text:")
+        input_label = QLabel("Enter URL:")
         input_label.setFont(QFont("Arial", 14, QFont.Bold))
         input_label.setStyleSheet("""
             QLabel {
@@ -212,7 +212,7 @@ class DarkQRCodeGeneratorApp(QMainWindow):
         
         # Input field
         self.url_input = DarkLineEdit()
-        self.url_input.setPlaceholderText("https://example.com or any text...")
+        self.url_input.setPlaceholderText("https://example.com")
         self.url_input.returnPressed.connect(self.generate_qr_code)
         input_layout.addWidget(self.url_input)
         
@@ -269,7 +269,7 @@ class DarkQRCodeGeneratorApp(QMainWindow):
                 font-size: 16px;
             }
         """)
-        self.qr_image_label.setText("QR Code will appear here\n\nEnter text or URL and click\n'Generate QR Code'")
+        self.qr_image_label.setText("QR Code will appear here\n\nEnter a valid URL and click\n'Generate QR Code'")
         self.qr_image_label.setMinimumSize(350, 350)
         qr_layout.addWidget(self.qr_image_label)
         
@@ -301,7 +301,7 @@ class DarkQRCodeGeneratorApp(QMainWindow):
     def clear_input(self):
         self.url_input.clear()
         self.qr_image_label.clear()
-        self.qr_image_label.setText("QR Code will appear here\n\nEnter text or URL and click\n'Generate QR Code'")
+        self.qr_image_label.setText("QR Code will appear here\n\nEnter a valid URL and click\n'Generate QR Code'")
         self.qr_image_label.setStyleSheet("""
             QLabel {
                 background: #1f2937;
@@ -317,27 +317,46 @@ class DarkQRCodeGeneratorApp(QMainWindow):
         self.save_btn.hide()
         self.qr_pixmap = None
         
-    def is_valid_input(self, text: str) -> bool:
-        if not text.strip():
+    def is_valid_url(self, url: str) -> bool:
+        """Strictly validate if the input is a proper URL"""
+        if not url.strip():
             return False
         
-        # Check if it's a URL
-        parsed = urlparse(text)
-        if parsed.scheme in ("http", "https") and parsed.netloc:
+        try:
+            parsed = urlparse(url.strip())
+            
+            # Must have both scheme and netloc (domain)
+            if not parsed.scheme or not parsed.netloc:
+                return False
+            
+            # Must be http or https
+            if parsed.scheme.lower() not in ('http', 'https'):
+                return False
+            
+            # Basic domain validation - must contain at least one dot
+            if '.' not in parsed.netloc:
+                return False
+            
+            # Domain should not start or end with dot or hyphen
+            domain_parts = parsed.netloc.split('.')
+            for part in domain_parts:
+                if not part or part.startswith('-') or part.endswith('-'):
+                    return False
+            
             return True
-        
-        # If not a URL, accept any non-empty text
-        return len(text.strip()) > 0
+            
+        except Exception:
+            return False
     
     def generate_qr_code(self):
         input_text = self.url_input.text().strip()
         
         try:
             if not input_text:
-                raise ValueError("Please enter a URL or text")
+                raise ValueError("Please enter a URL")
             
-            if not self.is_valid_input(input_text):
-                raise ValueError("Please enter valid text or a URL")
+            if not self.is_valid_url(input_text):
+                raise ValueError("Please enter a valid URL (must start with http:// or https://)")
             
             # Generate QR code with high quality settings
             qr = qrcode.QRCode(
@@ -378,7 +397,7 @@ class DarkQRCodeGeneratorApp(QMainWindow):
             display_text = input_text
             if len(display_text) > 60:
                 display_text = display_text[:60] + "..."
-            self.url_display.setText(f"Content: {display_text}")
+            self.url_display.setText(f"URL: {display_text}")
             self.url_display.show()
             
             # Show save button
